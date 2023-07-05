@@ -4,6 +4,9 @@
 package todo;
 
 import org.junit.jupiter.api.Test;
+
+import com.todo.App;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class AppTest {
