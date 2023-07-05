@@ -3,16 +3,20 @@ package com.todo.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "usergroupPermission")
-public class UsergroupPermission {
-
+@Table(name = "UserGroupPermissions")
+@IdClass(UserGroupPermissionId.class)
+public class UserGroupPermission {
+  @Id
   @Column(name = "usergourp_id")
   private int usergroup_id;
 
+  @Id
   @Column(name = "user_id")
   private int user_id;
 

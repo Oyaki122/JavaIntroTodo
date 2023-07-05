@@ -10,7 +10,7 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "taskset")
+@Table(name = "TaskSets")
 public class Taskset {
   @Id
   @Column(name = "id")
@@ -28,5 +28,4 @@ public class Taskset {
 
   @Column(name = "logo")
   private String logo;
-
 }
