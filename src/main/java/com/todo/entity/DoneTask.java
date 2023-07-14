@@ -6,9 +6,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@EqualsAndHashCode(callSuper = true)
 @Data
-@Table(name = "Tasks")
-public class Task extends TaskBase {
+@EqualsAndHashCode(callSuper = true)
+@Table(name = "DoneTasks")
+public class DoneTask extends TaskBase {
 
 }

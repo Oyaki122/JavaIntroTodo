@@ -18,7 +18,7 @@ public class Taskset {
   private int id;
 
   @Column(name = "usergroup_id")
-  private int usergroup_id;
+  private int usergroupId;
 
   @Column(name = "name")
   private String name;

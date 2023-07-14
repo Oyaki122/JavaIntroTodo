@@ -1,8 +1,6 @@
 
 package com.todo.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -12,10 +10,10 @@ import org.springframework.expression.spel.SpelEvaluationException;
 // import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 import com.todo.service.TaskService;
 import com.todo.entity.Task;
+
+import java.time.LocalDateTime;
 
 @Component
 public class TestRunner implements ApplicationRunner, ExitCodeGenerator, ExitCodeExceptionMapper {
@@ -37,8 +35,9 @@ public class TestRunner implements ApplicationRunner, ExitCodeGenerator, ExitCod
     var newTask = new Task();
     newTask.setTitle("hoge");
     newTask.setDescription("fuga");
-    newTask.setCreated_at("2021-01-01");
-    newTask.setUpdated_at("2021-01-01");
+    newTask.setCreated_at(LocalDateTime.now());
+    newTask.setUpdated_at(LocalDateTime.now());
+    newTask.setDue_date(LocalDateTime.now().plusMonths(5));
 
     taskService.save(newTask);
 

@@ -10,8 +10,8 @@ import lombok.Data;
 @Entity
 @Data
 @Table(name = "UserGroupPermissions")
-@IdClass(UserGroupPermissionId.class)
-public class UserGroupPermission {
+@IdClass(UsergroupPermissionId.class)
+public class UsergroupPermission {
   @Id
   @Column(name = "usergourp_id")
   private int usergroupId;
