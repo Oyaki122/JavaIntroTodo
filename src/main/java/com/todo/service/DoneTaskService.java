@@ -1,30 +1,29 @@
 package com.todo.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.todo.entity.Task;
-import com.todo.repository.TaskRepository;
-
-import java.util.Optional;
+import com.todo.entity.DoneTask;
+import com.todo.repository.DoneTaskRepository;
 
 @Service
-public class TaskService {
+public class DoneTaskService {
   @Autowired
-  private TaskRepository taskRepository;
+  private DoneTaskRepository taskRepository;
 
-  public List<Task> findAll() {
+  public List<DoneTask> findAll() {
     return taskRepository.findAll();
   }
 
-  public Optional<Task> findById(Long id) {
+  public Optional<DoneTask> findById(Long id) {
     return taskRepository.findById(id);
   }
 
-  public Long save(Task task) {
-    return taskRepository.save(task).getId();
+  public void save(DoneTask task) {
+    taskRepository.save(task);
   }
 
   public void delete(Long id) {

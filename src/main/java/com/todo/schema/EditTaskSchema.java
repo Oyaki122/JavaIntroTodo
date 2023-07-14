@@ -7,13 +7,14 @@ import java.time.format.DateTimeFormatter;
 import lombok.Data;
 
 @Data
-public class TaskEditSchema {
+public class EditTaskSchema {
   private String title;
   private String description;
   private LocalDateTime due_date;
   private int priority;
 
-  public TaskEditSchema(String title, String description, String due_date, int priority) throws ParseException {
+  public EditTaskSchema(String title, String description, String due_date, int priority)
+      throws ParseException {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
     this.title = title;
     this.description = description;
