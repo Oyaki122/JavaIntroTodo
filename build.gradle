@@ -35,7 +35,8 @@ dependencies {
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:31.1-jre'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'  
+    testImplementation 'com.h2database:h2:1.4.200'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.xerial:sqlite-jdbc'
 	compileOnly 'org.projectlombok:lombok'
