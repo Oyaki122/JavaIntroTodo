@@ -27,24 +27,24 @@ public class TestRunner implements ApplicationRunner, ExitCodeGenerator, ExitCod
 
   @Override
   public void run(ApplicationArguments args) {
-    var tasks = taskService.findAll();
-    for (var task : tasks) {
-      System.out.println(String.format("Task: {}", task));
-    }
+    // var tasks = taskService.findAll();
+    // for (var task : tasks) {
+    //   System.out.println(String.format("Task: {}", task));
+    // }
 
-    var newTask = new Task();
-    newTask.setTitle("hoge");
-    newTask.setDescription("fuga");
-    newTask.setCreated_at(LocalDateTime.now());
-    newTask.setUpdated_at(LocalDateTime.now());
-    newTask.setDue_date(LocalDateTime.now().plusMonths(5));
+    // var newTask = new Task();
+    // newTask.setTitle("hoge");
+    // newTask.setDescription("fuga");
+    // newTask.setCreated_at(LocalDateTime.now());
+    // newTask.setUpdated_at(LocalDateTime.now());
+    // newTask.setDue_date(LocalDateTime.now().plusMonths(5));
 
-    taskService.save(newTask);
+    // taskService.save(newTask);
 
-    tasks = taskService.findAll();
-    for (var task : tasks) {
-      System.out.println(String.format("Task: {}", task));
-    }
+    // tasks = taskService.findAll();
+    // for (var task : tasks) {
+    //   System.out.println(String.format("Task: {}", task));
+    // }
   }
 
   /**
