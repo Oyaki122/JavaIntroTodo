@@ -61,8 +61,6 @@ public class TaskController {
     return res;
   }
 
-
-
   @RequestMapping(value = "/task/{id}", method = RequestMethod.PUT, consumes = "application/json")
   public Boolean update(@RequestBody EditTaskSchema req, @PathVariable("id") Long id) {
     var searched = taskService.findById(id);
