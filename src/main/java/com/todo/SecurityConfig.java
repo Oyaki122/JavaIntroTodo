@@ -54,7 +54,7 @@ public class SecurityConfig {
             .failureUrl("/login?error") // ログイン失敗時の遷移先の指定
             .usernameParameter("email")
             .passwordParameter("password")
-            .defaultSuccessUrl("/hello", true)); // ログイン成功時の遷移先の指定
+            .defaultSuccessUrl("/user", true)); // ログイン成功時の遷移先の指定
 
     // ログアウト処理
     http

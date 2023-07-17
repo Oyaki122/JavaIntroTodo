@@ -1,8 +1,10 @@
 package com.todo.controller;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,8 +12,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.todo.entity.Task;
@@ -45,7 +49,7 @@ public class UserController {
     userService.setUser(form);
 
     redirectAttributes.addFlashAttribute("successMessage", "アカウントの登録が完了しました");
-    return "redirect:/hello";
+    return "redirect:/";
   }
 
   @GetMapping("/index")
@@ -60,4 +64,18 @@ public class UserController {
     return "user/login";
   }
 
+  @GetMapping("/user")
+  public String user(Model model) {
+    List<Task> tasks = taskService.findAll();
+    model.addAttribute("tasks", tasks);
+    return "user/user";
+  }
+
+  @GetMapping("/task/{id}")
+  public ModelAndView task(@PathVariable("id") Long id) {
+    ModelAndView mav = new ModelAndView("user/taskDetail");
+    Task task = taskService.findById(id).orElseThrow(() -> new NoSuchElementException("No task found with id: " + id));
+    mav.addObject("task", task);
+    return mav;
+  }
 }
