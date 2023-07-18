@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,15 +26,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+
 
 import com.todo.service.TaskService;
 import com.todo.service.UserService;
 import com.todo.entity.Task;
 import com.todo.entity.DoneTask;
+import com.todo.entity.MUser;
 import com.todo.service.DoneTaskService;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.time.LocalDateTime;
 
 import lombok.Data;
@@ -61,16 +69,26 @@ public class TaskController {
   }
 
 
-  @RequestMapping(value = "/task", method = RequestMethod.POST)
-  public String create(@ModelAttribute Task task, RedirectAttributes redirectAttrs) {
-      task.setCreated_at(LocalDateTime.now());
-      task.setUpdated_at(LocalDateTime.now());
-  
-      taskService.save(task);
-  
-      redirectAttrs.addFlashAttribute("successMessage", "Task successfully created.");
-      return "redirect:/task";
-  }
+@RequestMapping(value = "/task", method = RequestMethod.POST)
+public String create(@ModelAttribute Task task, RedirectAttributes redirectAttrs) {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    UserDetails userDetail = (UserDetails) auth.getPrincipal();
+    
+    Optional<MUser> optUser = userService.findByEmail(userDetail.getUsername());
+    if (optUser.isPresent()) {
+        MUser user = optUser.get();
+        task.setCreated_at(LocalDateTime.now());
+        task.setUpdated_at(LocalDateTime.now());
+        task.setCreateUser(user);
+        taskService.save(task);
+        redirectAttrs.addFlashAttribute("successMessage", "Task successfully created.");
+        return "redirect:/task";
+    } else {
+        redirectAttrs.addFlashAttribute("errorMessage", "User not found.");
+        return "redirect:/error";
+    }
+    
+}
   
 
   @GetMapping("/task/{id}")

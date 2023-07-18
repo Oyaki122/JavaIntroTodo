@@ -1,7 +1,9 @@
 package com.todo.controller;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.todo.entity.MUser;
 import com.todo.entity.Task;
 import com.todo.service.TaskService;
 import com.todo.service.UserService;
@@ -64,11 +67,27 @@ public class UserController {
     return "user/login";
   }
 
-  @GetMapping("/task")
-  public String user(Model model) {
-    List<Task> tasks = taskService.findAll();
-    model.addAttribute("tasks", tasks);
-    return "task/user-top";
-  }
+@GetMapping("/task")
+public String user(Model model, Principal principal) {
+    // ログインユーザーのemailを取得
+    String email = principal.getName();
+    
+    // ログインユーザーの情報を取得
+    Optional<MUser> optUser = userService.findByEmail(email);
+    
+    if (optUser.isPresent()) {
+        MUser user = optUser.get();
+        
+        // ログインユーザーが作成したタスクのみを取得
+        List<Task> tasks = taskService.findByCreateUserId(user.getId());
+        
+        model.addAttribute("tasks", tasks);
+        return "task/user-top";
+    } else {
+        // エラーハンドリングを適切に行ってください
+        return "redirect:/error";
+    }
+}
+
 
 }
