@@ -70,12 +70,4 @@ public class UserController {
     model.addAttribute("tasks", tasks);
     return "user/user";
   }
-
-  @GetMapping("/task/{id}")
-  public ModelAndView task(@PathVariable("id") Long id) {
-    ModelAndView mav = new ModelAndView("user/taskDetail");
-    Task task = taskService.findById(id).orElseThrow(() -> new NoSuchElementException("No task found with id: " + id));
-    mav.addObject("task", task);
-    return mav;
-  }
 }
