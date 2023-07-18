@@ -1,6 +1,9 @@
 
 package com.todo;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.filter.HiddenHttpMethodFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,7 +57,7 @@ public class SecurityConfig {
             .failureUrl("/login?error") // ログイン失敗時の遷移先の指定
             .usernameParameter("email")
             .passwordParameter("password")
-            .defaultSuccessUrl("/user", true)); // ログイン成功時の遷移先の指定
+            .defaultSuccessUrl("/task", true)); // ログイン成功時の遷移先の指定
 
     // ログアウト処理
     http
@@ -88,4 +91,14 @@ public class SecurityConfig {
         .build();
     return new InMemoryUserDetailsManager(user);
   }
+
+
+  @Configuration
+  public class WebConfig<HttpPutFormContentFilter> {
+      @Bean
+      public HiddenHttpMethodFilter hiddenHttpMethodFilter() {
+          return new HiddenHttpMethodFilter();
+      }
+  }
+
 }

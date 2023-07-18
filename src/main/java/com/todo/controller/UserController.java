@@ -64,16 +64,16 @@ public class UserController {
     return "user/login";
   }
 
-  @GetMapping("/user")
+  @GetMapping("/task")
   public String user(Model model) {
     List<Task> tasks = taskService.findAll();
     model.addAttribute("tasks", tasks);
-    return "user/user";
+    return "task/user-top";
   }
 
   @GetMapping("/task/{id}")
   public ModelAndView task(@PathVariable("id") Long id) {
-    ModelAndView mav = new ModelAndView("user/taskDetail");
+    ModelAndView mav = new ModelAndView("task/taskDetail");
     Task task = taskService.findById(id).orElseThrow(() -> new NoSuchElementException("No task found with id: " + id));
     mav.addObject("task", task);
     return mav;

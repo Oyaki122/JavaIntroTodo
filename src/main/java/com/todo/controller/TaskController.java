@@ -1,5 +1,11 @@
 package com.todo.controller;
 
+
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PutMapping;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +35,7 @@ import lombok.Data;
 
 import com.todo.schema.EditTaskSchema;
 
-@RestController
+@Controller
 public class TaskController {
   @Autowired
   private TaskService taskService;
@@ -78,6 +85,7 @@ public class TaskController {
     return true;
   }
 
+
   @DeleteMapping("/task/{id}")
   public Boolean delete(@PathVariable("id") Long id) {
     taskService.delete(id);
@@ -103,4 +111,17 @@ public class TaskController {
     taskService.delete(id);
     return true;
   }
+
+  @GetMapping("/task/{id}/edit")
+  public ModelAndView edit(@PathVariable("id") Long id, Model model) {
+      var searched = taskService.findById(id);
+      if (searched.isEmpty()) {
+          throw new TaskNotFoundException();
+      }
+      model.addAttribute("task", searched.get());
+      return new ModelAndView("task/editTask", model.asMap());
+  }
+  
+
+
 }
