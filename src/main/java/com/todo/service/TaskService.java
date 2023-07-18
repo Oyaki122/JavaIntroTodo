@@ -43,8 +43,10 @@ public class TaskService {
     return taskRepository.save(task);
 }
 
-public List<Task> findByCreateUserId(int createUserId) {
-  return taskRepository.findByCreateUserId(createUserId);
+public List<Task> findByCreateUserId(int id) {
+  return taskRepository.findByCreateUserIdOrderByDueDateAscPriorityDesc(id);
 }
+
+
 
 }

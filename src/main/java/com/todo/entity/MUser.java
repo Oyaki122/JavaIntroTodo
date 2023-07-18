@@ -45,4 +45,7 @@ public class MUser {
 
   @OneToMany(mappedBy = "createUser")
   private List<Task> myTasks = new ArrayList<Task>();
+
+  @OneToMany(mappedBy = "createUser")
+  private List<DoneTask> myDoneTasks = new ArrayList<DoneTask>();
 }

@@ -20,14 +20,17 @@
       <p><b>Due Date:</b> <span th:text="${task.dueDate}"></span></p>
       <p><b>Priority:</b> <span th:text="${task.priority}"></span></p>
       <a
-        th:href="@{/task/{id}/edit(id=*{task.id})}"
+        th:href="@{/doneTask/{id}/edit(id=*{task.id})}"
         class="btn btn-secondary mt-3"
         >Edit</a
       >
-      <a href="/api/task" class="btn btn-primary mt-3">戻る</a>
+      <a href="/api/doneTask" class="btn btn-primary mt-3">戻る</a>
       <div class="container">
         <h2>共有一覧</h2>
-        <form th:action="@{/task/{id}/share(id=${task.id})}" th:method="post">
+        <form
+          th:action="@{/doneTask/{id}/share(id=${task.id})}"
+          th:method="post"
+        >
           <label class="form-label">アドレス: </label>
           <input type="email" class="form-control" name="user_email" />
           <input type="submit" value="追加" class="btn btn-success" />
@@ -39,7 +42,7 @@
               <td th:text="${sharedUser.name}"></td>
               <td>
                 <form
-                  th:action="@{/task/{task}/share/{user}(task=${task.id}, user=${sharedUser.id})}"
+                  th:action="@{/doneTask/{doneTask}/share/{user}(doneTask=${task.id}, user=${sharedUser.id})}"
                   th:method="delete"
                   style="display: inline"
                 >

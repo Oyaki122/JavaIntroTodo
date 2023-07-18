@@ -56,10 +56,7 @@
     </nav>
     <div class="container">
       <h1 class="mt-5">User Tasks</h1>
-      <div class="d-flex justify-content-between align-items-center mt-4">
-        <h2>Tasks</h2>
-        <a href="/api/task/new" class="btn btn-primary">Create Task</a>
-      </div>
+      <h2 class="mt-4">Done Tasks</h2>
       <table class="table mt-3">
         <thead>
           <tr>
@@ -71,28 +68,28 @@
           </tr>
         </thead>
         <tbody>
-          <tr th:each="task : ${tasks}">
-            <td th:text="${task.title}"></td>
-            <td th:text="${task.description}"></td>
-            <td th:text="${task.dueDate}"></td>
-            <td th:text="${task.priority}"></td>
+          <tr th:each="doneTask : ${doneTasks}">
+            <td th:text="${doneTask.title}"></td>
+            <td th:text="${doneTask.description}"></td>
+            <td th:text="${doneTask.dueDate}"></td>
+            <td th:text="${doneTask.priority}"></td>
             <td>
-              <a class="btn btn-primary" th:href="@{/task/{id}(id=${task.id})}"
+              <a class="btn btn-primary" th:href="@{/donetask/{id}(id=${doneTask.id})}"
                 >Details</a
               >
               <form
-                th:action="@{/task/{id}(id=${task.id})}"
+                th:action="@{/donetask/{id}(id=${doneTask.id})}"
                 th:method="delete"
                 style="display: inline"
               >
                 <input type="submit" value="Delete" class="btn btn-danger" />
               </form>
               <form
-                th:action="@{/task/{id}/done(id=${task.id})}"
+                th:action="@{/donetask/{id}/undone(id=${doneTask.id})}"
                 th:method="post"
                 style="display: inline"
               >
-                <input type="submit" value="Done" class="btn btn-success" />
+                <input type="submit" value="Undone" class="btn btn-success" />
               </form>
             </td>
           </tr>

@@ -10,4 +10,6 @@ import com.todo.entity.Task;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
   List<Task> findByCreateUserId(int createUserId);
+  List<Task> findByCreateUserIdOrderByDueDateAscPriorityDesc(int createUserId);
+
 }

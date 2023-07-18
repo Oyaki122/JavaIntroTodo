@@ -2,14 +2,17 @@ package com.todo.controller;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.PostMapping;
-
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 
 import com.todo.entity.DoneTask;
 import com.todo.service.DoneTaskService;
@@ -40,7 +43,18 @@ public class DoneTaskcontroller {
   public class CreateTaskResponse {
     private long id;
   }
-
+  @PutMapping("/donetask/{id}")
+  public String update(@PathVariable("id") Long id, @Validated @ModelAttribute DoneTask task, BindingResult bindingResult) {
+      var searched = doneTaskService.findById(id);
+      if (searched.isEmpty()) {
+          throw new TaskNotFoundException();
+      }
+      DoneTask searchedTask = searched.get();
+      task.setId(id);
+      task.setCreated_at(searchedTask.getCreated_at());
+      doneTaskService.update(task);
+      return "redirect:/donetask/" + id;
+  }
   @RequestMapping(value = "/donetask/{id}", method = RequestMethod.PUT, consumes = "application/json")
   public Boolean update(@RequestBody EditTaskSchema req, @PathVariable("id") Long id) {
     var searched = doneTaskService.findById(id);
@@ -50,7 +64,7 @@ public class DoneTaskcontroller {
     var task = searched.get();
     task.setTitle(req.getTitle());
     task.setDescription(req.getDescription());
-    task.setDue_date(req.getDue_date());
+    task.setDueDate(req.getDue_date());
     task.setPriority(req.getPriority());
     task.setUpdated_at(LocalDateTime.now());
 
@@ -59,16 +73,16 @@ public class DoneTaskcontroller {
   }
 
   @DeleteMapping("/donetask/{id}")
-  public Boolean delete(@PathVariable("id") Long id) {
+  public String delete(@PathVariable("id") Long id) {
     doneTaskService.delete(id);
-    return true;
+    return "redirect:/task";
   }
 
   @PostMapping("/donetask/{id}/undone")
-  public Boolean undone(@PathVariable("id") Long id) {
+  public String undone(@PathVariable("id") Long id) {
     var searched = doneTaskService.findById(id);
     if (searched.isEmpty()) {
-      return false;
+      return "redirect:/task";
     }
     var donetask = searched.get();
     donetask.setUpdated_at(LocalDateTime.now());
@@ -76,13 +90,13 @@ public class DoneTaskcontroller {
     var task = new Task();
     task.setTitle(donetask.getTitle());
     task.setDescription(donetask.getDescription());
-    task.setDue_date(donetask.getDue_date());
+    task.setDueDate(donetask.getDueDate());
     task.setPriority(donetask.getPriority());
     task.setCreated_at(donetask.getCreated_at());
     task.setUpdated_at(donetask.getUpdated_at());
-
+    task.setCreateUser(donetask.getCreateUser());
     taskService.save(task);
     doneTaskService.delete(id);
-    return true;
+    return "redirect:/donetask";
   }
 }

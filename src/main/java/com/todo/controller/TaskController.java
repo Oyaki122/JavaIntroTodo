@@ -110,7 +110,7 @@ public String create(@ModelAttribute Task task, RedirectAttributes redirectAttrs
     Task task = searched.get();
     task.setTitle(req.getTitle());
     task.setDescription(req.getDescription());
-    task.setDue_date(req.getDue_date());
+    task.setDueDate(req.getDue_date());
     task.setPriority(req.getPriority());
     task.setUpdated_at(LocalDateTime.now());
 
@@ -135,11 +135,11 @@ public String create(@ModelAttribute Task task, RedirectAttributes redirectAttrs
     DoneTask doneTask = new DoneTask();
     doneTask.setTitle(task.getTitle());
     doneTask.setDescription(task.getDescription());
-    doneTask.setDue_date(task.getDue_date());
+    doneTask.setDueDate(task.getDueDate());
     doneTask.setPriority(task.getPriority());
     doneTask.setCreated_at(task.getCreated_at());
     doneTask.setUpdated_at(task.getUpdated_at());
-
+    doneTask.setCreateUser(task.getCreateUser());
     doneTaskService.save(doneTask);
     taskService.delete(id);
     return "redirect:/task";

@@ -39,6 +39,15 @@
               <a class="nav-link" th:href="@{/task}">My Tasks</a>
             </li>
             <li class="nav-item" th:if="${#authentication.principal != null}">
+              <a class="nav-link" th:href="@{/shared}">Shared</a>
+            </li>
+            <li class="nav-item" th:if="${#authentication.principal != null}">
+              <a class="nav-link" th:href="@{/donetask}">Done</a>
+            </li>
+            <li class="nav-item" th:if="${#authentication.principal != null}">
+              <a class="nav-link" th:href="@{/sheareddonetask}">Done Shared</a>
+            </li>
+            <li class="nav-item" th:if="${#authentication.principal != null}">
               <a class="nav-link" th:href="@{/logout}">Logout</a>
             </li>
           </ul>
@@ -65,7 +74,7 @@
           <tr th:each="task : ${tasks}">
             <td th:text="${task.title}"></td>
             <td th:text="${task.description}"></td>
-            <td th:text="${task.due_date}"></td>
+            <td th:text="${task.dueDate}"></td>
             <td th:text="${task.priority}"></td>
             <td>
               <a class="btn btn-primary" th:href="@{/task/{id}(id=${task.id})}"
