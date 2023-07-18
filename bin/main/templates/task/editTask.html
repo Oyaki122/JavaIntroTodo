@@ -18,8 +18,9 @@
         action="#"
         th:action="@{/task/{id}(id=${task.id})}"
         th:object="${task}"
-        th:method="put"
+        method="post"
       >
+        <input type="hidden" name="_method" value="put" />
         <div class="mb-3">
           <label class="form-label">Title</label>
           <input
@@ -41,7 +42,7 @@
         <div class="mb-3">
           <label class="form-label">Due Date</label>
           <input
-            type="date"
+            type="datetime-local"
             class="form-control"
             th:field="*{due_date}"
             required

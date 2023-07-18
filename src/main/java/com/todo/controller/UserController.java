@@ -70,15 +70,5 @@ public class UserController {
     model.addAttribute("tasks", tasks);
     return "task/user-top";
   }
-<<<<<<< HEAD
 
-  @GetMapping("/task/{id}")
-  public ModelAndView task(@PathVariable("id") Long id) {
-    ModelAndView mav = new ModelAndView("task/taskDetail");
-    Task task = taskService.findById(id).orElseThrow(() -> new NoSuchElementException("No task found with id: " + id));
-    mav.addObject("task", task);
-    return mav;
-  }
-=======
->>>>>>> 563e893c9ebd298ac2c202dd577e1a1de7fedf92
 }

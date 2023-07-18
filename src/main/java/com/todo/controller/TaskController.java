@@ -1,13 +1,10 @@
 package com.todo.controller;
 
 
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PutMapping;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -77,7 +76,7 @@ public class TaskController {
 
   @GetMapping("/task/{id}")
   public ModelAndView task(@PathVariable("id") Long id) {
-    ModelAndView mav = new ModelAndView("user/taskDetail");
+    ModelAndView mav = new ModelAndView("task/taskDetail");
     Task task = taskService.findById(id).orElseThrow(() -> new NoSuchElementException("No task found with id: " + id));
     mav.addObject("task", task);
     mav.addObject("sharedUsers", task.getSharedUsers());
@@ -162,4 +161,17 @@ public class TaskController {
     taskService.save(task);
     return "redirect:/task/" + id;
   }
+
+  @PutMapping("/task/{id}")
+  public String update(@PathVariable("id") Long id, @Validated @ModelAttribute Task task, BindingResult bindingResult) {
+  
+      var searched = taskService.findById(id);
+      if (searched.isEmpty()) {
+          throw new TaskNotFoundException();
+      }
+      task.setId(id);
+      taskService.update(task);
+      return "redirect:/task/" + id;
+  }
+  
 }

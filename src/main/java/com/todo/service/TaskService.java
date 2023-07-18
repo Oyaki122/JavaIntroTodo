@@ -35,6 +35,7 @@ public class TaskService {
     if (task.getId() == null) {
         throw new IllegalArgumentException("ID cannot be null when updating a task.");
     }
+    
     return taskRepository.save(task);
 }
 }
