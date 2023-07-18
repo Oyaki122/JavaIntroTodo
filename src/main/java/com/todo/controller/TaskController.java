@@ -23,6 +23,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.todo.service.TaskService;
 import com.todo.service.UserService;
@@ -59,20 +60,18 @@ public class TaskController {
     private long id;
   }
 
-  @RequestMapping(value = "/task", method = RequestMethod.POST, consumes = "application/json")
-  public CreateTaskResponse create(@RequestBody EditTaskSchema req) {
-    Task task = new Task();
-    task.setTitle(req.getTitle());
-    task.setDescription(req.getDescription());
-    task.setDue_date(req.getDue_date());
-    task.setPriority(req.getPriority());
-    task.setCreated_at(LocalDateTime.now());
-    task.setUpdated_at(LocalDateTime.now());
 
-    var res = new CreateTaskResponse();
-    res.setId(taskService.save(task));
-    return res;
+  @RequestMapping(value = "/task", method = RequestMethod.POST)
+  public String create(@ModelAttribute Task task, RedirectAttributes redirectAttrs) {
+      task.setCreated_at(LocalDateTime.now());
+      task.setUpdated_at(LocalDateTime.now());
+  
+      taskService.save(task);
+  
+      redirectAttrs.addFlashAttribute("successMessage", "Task successfully created.");
+      return "redirect:/task";
   }
+  
 
   @GetMapping("/task/{id}")
   public ModelAndView task(@PathVariable("id") Long id) {
@@ -103,16 +102,16 @@ public class TaskController {
 
 
   @DeleteMapping("/task/{id}")
-  public Boolean delete(@PathVariable("id") Long id) {
+  public String delete(@PathVariable("id") Long id) {
     taskService.delete(id);
-    return true;
+    return "redirect:/task";
   }
 
   @PostMapping("/task/{id}/done")
-  public Boolean done(@PathVariable("id") Long id) {
+  public String done(@PathVariable("id") Long id) {
     var searched = taskService.findById(id);
     if (searched.isEmpty()) {
-      return false;
+      return "redirect:/task";
     }
     Task task = searched.get();
     DoneTask doneTask = new DoneTask();
@@ -125,7 +124,7 @@ public class TaskController {
 
     doneTaskService.save(doneTask);
     taskService.delete(id);
-    return true;
+    return "redirect:/task";
   }
 
   @GetMapping("/task/{id}/edit")
@@ -164,14 +163,21 @@ public class TaskController {
 
   @PutMapping("/task/{id}")
   public String update(@PathVariable("id") Long id, @Validated @ModelAttribute Task task, BindingResult bindingResult) {
-  
       var searched = taskService.findById(id);
       if (searched.isEmpty()) {
           throw new TaskNotFoundException();
       }
+      Task searchedTask = searched.get();
       task.setId(id);
+      task.setCreated_at(searchedTask.getCreated_at());
       taskService.update(task);
       return "redirect:/task/" + id;
+  }
+
+  @GetMapping("/task/new")
+  public String showCreateTaskForm(Model model) {
+    model.addAttribute("task", new Task());
+      return "task/createTask";
   }
   
 }

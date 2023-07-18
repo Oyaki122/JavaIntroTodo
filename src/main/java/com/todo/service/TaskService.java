@@ -1,5 +1,7 @@
 package com.todo.service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +37,10 @@ public class TaskService {
     if (task.getId() == null) {
         throw new IllegalArgumentException("ID cannot be null when updating a task.");
     }
+    LocalDateTime currentDateTime = LocalDateTime.now();
     
+    task.setUpdated_at(currentDateTime);
     return taskRepository.save(task);
 }
+
 }

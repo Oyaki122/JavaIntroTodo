@@ -38,5 +38,8 @@ public class TaskBase {
 
   @Column(name = "priority")
   private int priority;
+  
+
+  
 
 }
