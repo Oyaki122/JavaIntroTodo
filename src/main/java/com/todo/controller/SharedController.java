@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -17,6 +19,7 @@ import com.todo.service.UserService;
 import com.todo.entity.Task;
 import com.todo.entity.DoneTask;
 import com.todo.service.DoneTaskService;
+import com.todo.entity.MUser;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -27,7 +30,7 @@ import lombok.Data;
 import com.todo.schema.EditTaskSchema;
 
 @Controller
-public class TaskController {
+public class SharedController {
   @Autowired
   private TaskService taskService;
 
@@ -37,41 +40,26 @@ public class TaskController {
   @Autowired
   private UserService userService;
 
-  @GetMapping("/all-task")
-  public List<Task> tasks() {
-    return taskService.findAll();
-  }
-
   @Data
   public class CreateTaskResponse {
     private long id;
   }
 
-  // @GetMapping("/user")
-  // public String user( model) {
-  // List<Task> tasks = taskService.findAll();
-  // model.addAttribute("tasks", tasks);
-  // return "user/user";
-  // }
+  @GetMapping("/shared")
+  public ModelAndView shared(@AuthenticationPrincipal UserDetails user) {
+    ModelAndView mav = new ModelAndView("user/shared");
 
-  @RequestMapping(value = "/task", method = RequestMethod.POST, consumes = "application/json")
-  public CreateTaskResponse create(@RequestBody EditTaskSchema req) {
-    Task task = new Task();
-    task.setTitle(req.getTitle());
-    task.setDescription(req.getDescription());
-    task.setDue_date(req.getDue_date());
-    task.setPriority(req.getPriority());
-    task.setCreated_at(LocalDateTime.now());
-    task.setUpdated_at(LocalDateTime.now());
+    var loginUser = userService.findByEmail(user.getUsername())
+        .orElseThrow(() -> new NoSuchElementException("No user found with email: " + user.getUsername()));
 
-    var res = new CreateTaskResponse();
-    res.setId(taskService.save(task));
-    return res;
+    List<Task> tasks = loginUser.getSharedTasks();
+    mav.addObject("tasks", tasks);
+    return mav;
   }
 
-  @GetMapping("/task/{id}")
+  @GetMapping("/shared/{id}")
   public ModelAndView task(@PathVariable("id") Long id) {
-    ModelAndView mav = new ModelAndView("user/taskDetail");
+    ModelAndView mav = new ModelAndView("user/sharedDetail");
     Task task = taskService.findById(id).orElseThrow(() -> new NoSuchElementException("No task found with id: " + id));
     mav.addObject("task", task);
     mav.addObject("sharedUsers", task.getSharedUsers());
@@ -79,7 +67,7 @@ public class TaskController {
     return mav;
   }
 
-  @RequestMapping(value = "/task/{id}", method = RequestMethod.PUT, consumes = "application/json")
+  @RequestMapping(value = "/shared/{id}", method = RequestMethod.PUT, consumes = "application/json")
   public Boolean update(@RequestBody EditTaskSchema req, @PathVariable("id") Long id) {
     var searched = taskService.findById(id);
     if (searched.isEmpty()) {
@@ -96,13 +84,7 @@ public class TaskController {
     return true;
   }
 
-  @DeleteMapping("/task/{id}")
-  public Boolean delete(@PathVariable("id") Long id) {
-    taskService.delete(id);
-    return true;
-  }
-
-  @PostMapping("/task/{id}/done")
+  @PostMapping("/shared/{id}/done")
   public Boolean done(@PathVariable("id") Long id) {
     var searched = taskService.findById(id);
     if (searched.isEmpty()) {
@@ -120,29 +102,5 @@ public class TaskController {
     doneTaskService.save(doneTask);
     taskService.delete(id);
     return true;
-  }
-
-  @PostMapping("/task/{id}/share")
-  public String share(@PathVariable("id") Long id,
-      @RequestParam(name = "user_email", required = true) String user_email) {
-    var task = taskService.findById(id).orElseThrow(() -> new NoSuchElementException("No task found with id: " + id));
-    var share = task.getSharedUsers();
-    var user = userService.findByEmail(user_email)
-        .orElseThrow(() -> new NoSuchElementException("No user found with email: " + user_email));
-    share.add(user);
-    task.setSharedUsers(share);
-    taskService.save(task);
-    return "redirect:/task/" + id;
-  }
-
-  @DeleteMapping("/task/{id}/share/{user_id}")
-  public String unshare(@PathVariable("id") Long id,
-      @PathVariable("user_id") Long user_id) {
-    var task = taskService.findById(id).orElseThrow(() -> new NoSuchElementException("No task found with id: " + id));
-    var share = task.getSharedUsers();
-    share.removeIf(s -> s.getId() == user_id);
-    task.setSharedUsers(share);
-    taskService.save(task);
-    return "redirect:/task/" + id;
   }
 }
