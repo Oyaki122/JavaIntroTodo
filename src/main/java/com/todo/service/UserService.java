@@ -45,6 +45,10 @@ public class UserService {
     return userRepository.findByEmail(email);
   }
 
+  public Optional<MUser> findById(long id) {
+    return userRepository.findById(id);
+  }
+
   public List<MUser> findAll() {
     return userRepository.findAll();
   }
