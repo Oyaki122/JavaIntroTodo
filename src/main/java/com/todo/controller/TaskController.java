@@ -1,12 +1,11 @@
 package com.todo.controller;
 
-
-
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,7 +25,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-
 
 import com.todo.service.TaskService;
 import com.todo.service.UserService;
@@ -65,28 +63,26 @@ public class TaskController {
     private long id;
   }
 
-
-@RequestMapping(value = "/task", method = RequestMethod.POST)
-public String create(@ModelAttribute Task task, RedirectAttributes redirectAttrs) {
+  @RequestMapping(value = "/task", method = RequestMethod.POST)
+  public String create(@ModelAttribute Task task, RedirectAttributes redirectAttrs) {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     UserDetails userDetail = (UserDetails) auth.getPrincipal();
-    
+
     Optional<MUser> optUser = userService.findByEmail(userDetail.getUsername());
     if (optUser.isPresent()) {
-        MUser user = optUser.get();
-        task.setCreated_at(LocalDateTime.now());
-        task.setUpdated_at(LocalDateTime.now());
-        task.setCreateUser(user);
-        taskService.save(task);
-        redirectAttrs.addFlashAttribute("successMessage", "Task successfully created.");
-        return "redirect:/task";
+      MUser user = optUser.get();
+      task.setCreated_at(LocalDateTime.now());
+      task.setUpdated_at(LocalDateTime.now());
+      task.setCreateUser(user);
+      taskService.save(task);
+      redirectAttrs.addFlashAttribute("successMessage", "Task successfully created.");
+      return "redirect:/task";
     } else {
-        redirectAttrs.addFlashAttribute("errorMessage", "User not found.");
-        return "redirect:/error";
+      redirectAttrs.addFlashAttribute("errorMessage", "User not found.");
+      return "redirect:/error";
     }
-    
-}
-  
+
+  }
 
   @GetMapping("/task/{id}")
   public ModelAndView task(@PathVariable("id") Long id) {
@@ -114,7 +110,6 @@ public String create(@ModelAttribute Task task, RedirectAttributes redirectAttrs
     taskService.save(task);
     return true;
   }
-
 
   @DeleteMapping("/task/{id}")
   public String delete(@PathVariable("id") Long id) {
@@ -144,14 +139,14 @@ public String create(@ModelAttribute Task task, RedirectAttributes redirectAttrs
 
   @GetMapping("/task/{id}/edit")
   public ModelAndView edit(@PathVariable("id") Long id, Model model) {
-      var searched = taskService.findById(id);
-      if (searched.isEmpty()) {
-          throw new TaskNotFoundException();
-      }
-      model.addAttribute("task", searched.get());
-      return new ModelAndView("task/editTask", model.asMap());
+    var searched = taskService.findById(id);
+    if (searched.isEmpty()) {
+      throw new TaskNotFoundException();
+    }
+    model.addAttribute("task", searched.get());
+    return new ModelAndView("task/editTask", model.asMap());
   }
-  
+
   @PostMapping("/task/{id}/share")
   public String share(@PathVariable("id") Long id,
       @RequestParam(name = "user_email", required = true) String user_email) {
@@ -178,21 +173,21 @@ public String create(@ModelAttribute Task task, RedirectAttributes redirectAttrs
 
   @PutMapping("/task/{id}")
   public String update(@PathVariable("id") Long id, @Validated @ModelAttribute Task task, BindingResult bindingResult) {
-      var searched = taskService.findById(id);
-      if (searched.isEmpty()) {
-          throw new TaskNotFoundException();
-      }
-      Task searchedTask = searched.get();
-      task.setId(id);
-      task.setCreated_at(searchedTask.getCreated_at());
-      taskService.update(task);
-      return "redirect:/task/" + id;
+    var searched = taskService.findById(id);
+    if (searched.isEmpty()) {
+      throw new TaskNotFoundException();
+    }
+    Task searchedTask = searched.get();
+    task.setId(id);
+    task.setCreated_at(searchedTask.getCreated_at());
+    taskService.update(task);
+    return "redirect:/task/" + id;
   }
 
   @GetMapping("/task/new")
   public String showCreateTaskForm(Model model) {
     model.addAttribute("task", new Task());
-      return "task/createTask";
+    return "task/createTask";
   }
-  
+
 }
