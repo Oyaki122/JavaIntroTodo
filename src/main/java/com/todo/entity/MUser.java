@@ -43,6 +43,9 @@ public class MUser {
   @ManyToMany(mappedBy = "sharedUsers")
   private List<Task> sharedTasks = new ArrayList<Task>();
 
+  @ManyToMany(mappedBy = "doneSharedUsers")
+  private List<DoneTask> doneSharedTasks = new ArrayList<DoneTask>();
+
   @OneToMany(mappedBy = "createUser")
   private List<Task> myTasks = new ArrayList<Task>();
 

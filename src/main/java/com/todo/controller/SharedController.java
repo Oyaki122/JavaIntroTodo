@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,8 +17,10 @@ import com.todo.service.TaskService;
 import com.todo.service.UserService;
 import com.todo.entity.Task;
 import com.todo.entity.DoneTask;
+import com.todo.entity.MUser;
 import com.todo.service.DoneTaskService;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.time.LocalDateTime;
@@ -72,23 +75,6 @@ public class SharedController {
     return mav;
   }
 
-  @RequestMapping(value = "/shared/{id}", method = RequestMethod.PUT, consumes = "application/json")
-  public Boolean update(@RequestBody EditTaskSchema req, @PathVariable("id") Long id) {
-    var searched = taskService.findById(id);
-    if (searched.isEmpty()) {
-      return false;
-    }
-    Task task = searched.get();
-    task.setTitle(req.getTitle());
-    task.setDescription(req.getDescription());
-    task.setDueDate(req.getDue_date());
-    task.setPriority(req.getPriority());
-    task.setUpdated_at(LocalDateTime.now());
-
-    taskService.save(task);
-    return true;
-  }
-
   @PostMapping("/shared/{id}/done")
   public String done(@PathVariable("id") Long id) {
     var searched = taskService.findById(id);
@@ -103,9 +89,15 @@ public class SharedController {
     doneTask.setPriority(task.getPriority());
     doneTask.setCreated_at(task.getCreated_at());
     doneTask.setUpdated_at(task.getUpdated_at());
+    doneTask.setDoneSharedUsers(task.getSharedUsers().stream().map(i -> {
+      MUser user = new MUser();
+      BeanUtils.copyProperties(i, user);
+      return user;
+    }).toList());
+    doneTask.setCreateUser(task.getCreateUser());
 
-    doneTaskService.save(doneTask);
     taskService.delete(id);
+    doneTaskService.save(doneTask);
     return "redirect:/shared";
   }
 }

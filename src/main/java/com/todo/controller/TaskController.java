@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -127,8 +128,14 @@ public class TaskController {
     doneTask.setCreated_at(task.getCreated_at());
     doneTask.setUpdated_at(task.getUpdated_at());
     doneTask.setCreateUser(task.getCreateUser());
-    doneTaskService.save(doneTask);
+    doneTask.setDoneSharedUsers(task.getSharedUsers().stream().map(i -> {
+      MUser user = new MUser();
+      BeanUtils.copyProperties(i, user);
+      return user;
+    }).toList());
+
     taskService.delete(id);
+    doneTaskService.save(doneTask);
     return "redirect:/task";
   }
 

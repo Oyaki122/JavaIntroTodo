@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -124,8 +125,14 @@ public class DoneTaskcontroller {
     task.setCreated_at(donetask.getCreated_at());
     task.setUpdated_at(donetask.getUpdated_at());
     task.setCreateUser(donetask.getCreateUser());
-    taskService.save(task);
+    task.setSharedUsers(donetask.getDoneSharedUsers().stream().map(i -> {
+      MUser user = new MUser();
+      BeanUtils.copyProperties(i, user);
+      return user;
+    }).toList());
+
     doneTaskService.delete(id);
+    taskService.save(task);
     return "redirect:/donetask";
   }
 }

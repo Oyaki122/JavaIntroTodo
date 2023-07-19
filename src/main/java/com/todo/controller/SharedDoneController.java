@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +17,7 @@ import com.todo.service.TaskService;
 import com.todo.service.UserService;
 import com.todo.entity.Task;
 import com.todo.entity.DoneTask;
+import com.todo.entity.MUser;
 import com.todo.service.DoneTaskService;
 
 import java.util.List;
@@ -44,12 +46,12 @@ public class SharedDoneController {
 
   @GetMapping("/sharedDone")
   public ModelAndView shared(@AuthenticationPrincipal UserDetails user) {
-    ModelAndView mav = new ModelAndView("task/shared");
+    ModelAndView mav = new ModelAndView("task/sharedDone");
 
     var loginUser = userService.findByEmail(user.getUsername())
         .orElseThrow(() -> new NoSuchElementException("No user found with email: " + user.getUsername()));
 
-    List<Task> tasks = loginUser.getSharedTasks();
+    List<DoneTask> tasks = loginUser.getDoneSharedTasks();
     mav.addObject("tasks", tasks);
     return mav;
   }
@@ -58,36 +60,39 @@ public class SharedDoneController {
   public ModelAndView task(@PathVariable("id") Long id, @AuthenticationPrincipal UserDetails user) {
     var loginUser = userService.findByEmail(user.getUsername())
         .orElseThrow(() -> new NoSuchElementException("No user found with email: " + user.getUsername()));
-    var isShared = loginUser.getSharedTasks().stream().anyMatch(task -> task.getId().equals(id));
+    var isShared = loginUser.getDoneSharedTasks().stream().anyMatch(task -> task.getId().equals(id));
 
     if (!isShared) {
       throw new NoSuchElementException("No task found with id: " + id);
     }
 
-    ModelAndView mav = new ModelAndView("task/sharedDetail");
-    Task task = taskService.findById(id).orElseThrow(() -> new NoSuchElementException("No task found with id: " + id));
+    ModelAndView mav = new ModelAndView("task/sharedDoneDetail");
+    DoneTask task = doneTaskService.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("No task found with id: " + id));
     mav.addObject("task", task);
-    mav.addObject("sharedUsers", task.getSharedUsers());
+    mav.addObject("sharedUsers", task.getDoneSharedUsers());
 
     return mav;
   }
 
-  @RequestMapping(value = "/sharedDone/{id}", method = RequestMethod.PUT, consumes = "application/json")
-  public Boolean update(@RequestBody EditTaskSchema req, @PathVariable("id") Long id) {
-    var searched = taskService.findById(id);
-    if (searched.isEmpty()) {
-      return false;
-    }
-    Task task = searched.get();
-    task.setTitle(req.getTitle());
-    task.setDescription(req.getDescription());
-    task.setDueDate(req.getDue_date());
-    task.setPriority(req.getPriority());
-    task.setUpdated_at(LocalDateTime.now());
+  // @RequestMapping(value = "/sharedDone/{id}", method = RequestMethod.PUT,
+  // consumes = "application/json")
+  // public Boolean update(@RequestBody EditTaskSchema req, @PathVariable("id")
+  // Long id) {
+  // var searched = taskService.findById(id);
+  // if (searched.isEmpty()) {
+  // return false;
+  // }
+  // Task task = searched.get();
+  // task.setTitle(req.getTitle());
+  // task.setDescription(req.getDescription());
+  // task.setDueDate(req.getDue_date());
+  // task.setPriority(req.getPriority());
+  // task.setUpdated_at(LocalDateTime.now());
 
-    taskService.save(task);
-    return true;
-  }
+  // taskService.save(task);
+  // return true;
+  // }
 
   @PostMapping("/sharedDone/{id}/undone")
   public String done(@PathVariable("id") Long id) {
@@ -95,16 +100,21 @@ public class SharedDoneController {
     if (searched.isEmpty()) {
       return "redirect:/shared";
     }
-    DoneTask task = searched.get();
-    Task newTask = new Task();
-    newTask.setTitle(task.getTitle());
-    newTask.setDescription(task.getDescription());
-    newTask.setDueDate(task.getDueDate());
-    newTask.setPriority(task.getPriority());
-    newTask.setCreated_at(task.getCreated_at());
-    newTask.setUpdated_at(task.getUpdated_at());
-
-    taskService.save(newTask);
+    DoneTask donetask = searched.get();
+    var task = new Task();
+    task.setTitle(donetask.getTitle());
+    task.setDescription(donetask.getDescription());
+    task.setDueDate(donetask.getDueDate());
+    task.setPriority(donetask.getPriority());
+    task.setCreated_at(donetask.getCreated_at());
+    task.setUpdated_at(donetask.getUpdated_at());
+    task.setCreateUser(donetask.getCreateUser());
+    task.setSharedUsers(donetask.getDoneSharedUsers().stream().map(i -> {
+      MUser user = new MUser();
+      BeanUtils.copyProperties(i, user);
+      return user;
+    }).toList());
+    taskService.save(task);
     doneTaskService.delete(id);
     return "redirect:/sharedDone";
   }
