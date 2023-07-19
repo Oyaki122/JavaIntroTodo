@@ -1,7 +1,10 @@
 package com.todo.controller;
 
+
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,17 +12,32 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+
 
 import com.todo.service.TaskService;
 import com.todo.service.UserService;
 import com.todo.entity.Task;
 import com.todo.entity.DoneTask;
+import com.todo.entity.MUser;
 import com.todo.service.DoneTaskService;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.time.LocalDateTime;
 
 import lombok.Data;
@@ -47,31 +65,32 @@ public class TaskController {
     private long id;
   }
 
-  // @GetMapping("/user")
-  // public String user( model) {
-  // List<Task> tasks = taskService.findAll();
-  // model.addAttribute("tasks", tasks);
-  // return "user/user";
-  // }
 
-  @RequestMapping(value = "/task", method = RequestMethod.POST, consumes = "application/json")
-  public CreateTaskResponse create(@RequestBody EditTaskSchema req) {
-    Task task = new Task();
-    task.setTitle(req.getTitle());
-    task.setDescription(req.getDescription());
-    task.setDue_date(req.getDue_date());
-    task.setPriority(req.getPriority());
-    task.setCreated_at(LocalDateTime.now());
-    task.setUpdated_at(LocalDateTime.now());
-
-    var res = new CreateTaskResponse();
-    res.setId(taskService.save(task));
-    return res;
-  }
+@RequestMapping(value = "/task", method = RequestMethod.POST)
+public String create(@ModelAttribute Task task, RedirectAttributes redirectAttrs) {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    UserDetails userDetail = (UserDetails) auth.getPrincipal();
+    
+    Optional<MUser> optUser = userService.findByEmail(userDetail.getUsername());
+    if (optUser.isPresent()) {
+        MUser user = optUser.get();
+        task.setCreated_at(LocalDateTime.now());
+        task.setUpdated_at(LocalDateTime.now());
+        task.setCreateUser(user);
+        taskService.save(task);
+        redirectAttrs.addFlashAttribute("successMessage", "Task successfully created.");
+        return "redirect:/task";
+    } else {
+        redirectAttrs.addFlashAttribute("errorMessage", "User not found.");
+        return "redirect:/error";
+    }
+    
+}
+  
 
   @GetMapping("/task/{id}")
   public ModelAndView task(@PathVariable("id") Long id) {
-    ModelAndView mav = new ModelAndView("user/taskDetail");
+    ModelAndView mav = new ModelAndView("task/taskDetail");
     Task task = taskService.findById(id).orElseThrow(() -> new NoSuchElementException("No task found with id: " + id));
     mav.addObject("task", task);
     mav.addObject("sharedUsers", task.getSharedUsers());
@@ -88,7 +107,7 @@ public class TaskController {
     Task task = searched.get();
     task.setTitle(req.getTitle());
     task.setDescription(req.getDescription());
-    task.setDue_date(req.getDue_date());
+    task.setDueDate(req.getDue_date());
     task.setPriority(req.getPriority());
     task.setUpdated_at(LocalDateTime.now());
 
@@ -96,32 +115,43 @@ public class TaskController {
     return true;
   }
 
+
   @DeleteMapping("/task/{id}")
-  public Boolean delete(@PathVariable("id") Long id) {
+  public String delete(@PathVariable("id") Long id) {
     taskService.delete(id);
-    return true;
+    return "redirect:/task";
   }
 
   @PostMapping("/task/{id}/done")
-  public Boolean done(@PathVariable("id") Long id) {
+  public String done(@PathVariable("id") Long id) {
     var searched = taskService.findById(id);
     if (searched.isEmpty()) {
-      return false;
+      return "redirect:/task";
     }
     Task task = searched.get();
     DoneTask doneTask = new DoneTask();
     doneTask.setTitle(task.getTitle());
     doneTask.setDescription(task.getDescription());
-    doneTask.setDue_date(task.getDue_date());
+    doneTask.setDueDate(task.getDueDate());
     doneTask.setPriority(task.getPriority());
     doneTask.setCreated_at(task.getCreated_at());
     doneTask.setUpdated_at(task.getUpdated_at());
-
+    doneTask.setCreateUser(task.getCreateUser());
     doneTaskService.save(doneTask);
     taskService.delete(id);
-    return true;
+    return "redirect:/task";
   }
 
+  @GetMapping("/task/{id}/edit")
+  public ModelAndView edit(@PathVariable("id") Long id, Model model) {
+      var searched = taskService.findById(id);
+      if (searched.isEmpty()) {
+          throw new TaskNotFoundException();
+      }
+      model.addAttribute("task", searched.get());
+      return new ModelAndView("task/editTask", model.asMap());
+  }
+  
   @PostMapping("/task/{id}/share")
   public String share(@PathVariable("id") Long id,
       @RequestParam(name = "user_email", required = true) String user_email) {
@@ -145,4 +175,24 @@ public class TaskController {
     taskService.save(task);
     return "redirect:/task/" + id;
   }
+
+  @PutMapping("/task/{id}")
+  public String update(@PathVariable("id") Long id, @Validated @ModelAttribute Task task, BindingResult bindingResult) {
+      var searched = taskService.findById(id);
+      if (searched.isEmpty()) {
+          throw new TaskNotFoundException();
+      }
+      Task searchedTask = searched.get();
+      task.setId(id);
+      task.setCreated_at(searchedTask.getCreated_at());
+      taskService.update(task);
+      return "redirect:/task/" + id;
+  }
+
+  @GetMapping("/task/new")
+  public String showCreateTaskForm(Model model) {
+    model.addAttribute("task", new Task());
+      return "task/createTask";
+  }
+  
 }

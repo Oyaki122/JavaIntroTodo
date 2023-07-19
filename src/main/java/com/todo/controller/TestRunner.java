@@ -37,7 +37,7 @@ public class TestRunner implements ApplicationRunner, ExitCodeGenerator, ExitCod
     // newTask.setDescription("fuga");
     // newTask.setCreated_at(LocalDateTime.now());
     // newTask.setUpdated_at(LocalDateTime.now());
-    // newTask.setDue_date(LocalDateTime.now().plusMonths(5));
+    // newTask.setDueDate(LocalDateTime.now().plusMonths(5));
 
     // taskService.save(newTask);
 

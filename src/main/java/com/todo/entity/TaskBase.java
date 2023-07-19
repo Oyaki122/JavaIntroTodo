@@ -34,9 +34,13 @@ public class TaskBase {
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "due_date")
-  private LocalDateTime due_date;
+  private LocalDateTime dueDate;
+  
 
   @Column(name = "priority")
   private int priority;
+  
+
+  
 
 }
