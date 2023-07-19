@@ -1,8 +1,10 @@
 package com.todo.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -11,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.todo.service.TaskService;
@@ -75,6 +80,28 @@ public class SharedController {
     return mav;
   }
 
+  @PutMapping("/shared/{id}")
+  public String update(@PathVariable("id") Long id, @Validated @ModelAttribute Task task, BindingResult bindingResult,
+      @AuthenticationPrincipal UserDetails user) {
+    var loginUser = userService.findByEmail(user.getUsername())
+        .orElseThrow(() -> new NoSuchElementException("No user found with email: " + user.getUsername()));
+    var isShared = loginUser.getSharedTasks().stream().anyMatch(i -> i.getId().equals(id));
+    if (!isShared) {
+      throw new NoSuchElementException("No task found with id: " + id);
+    }
+    var searched = taskService.findById(id);
+    if (searched.isEmpty()) {
+      throw new TaskNotFoundException();
+    }
+    Task searchedTask = searched.get();
+    searchedTask.setTitle(task.getTitle());
+    searchedTask.setDescription(task.getDescription());
+    searchedTask.setDueDate(task.getDueDate());
+    searchedTask.setPriority(task.getPriority());
+    taskService.update(searchedTask);
+    return "redirect:/shared/" + id;
+  }
+
   @PostMapping("/shared/{id}/done")
   public String done(@PathVariable("id") Long id) {
     var searched = taskService.findById(id);
@@ -99,5 +126,18 @@ public class SharedController {
     taskService.delete(id);
     doneTaskService.save(doneTask);
     return "redirect:/shared";
+  }
+
+  @GetMapping("/shared/{id}/edit")
+  public String edit(Model model, @PathVariable("id") Long id, @AuthenticationPrincipal UserDetails user) {
+    var loginUser = userService.findByEmail(user.getUsername())
+        .orElseThrow(() -> new NoSuchElementException("No user found with email: " + user.getUsername()));
+    var isShared = loginUser.getSharedTasks().stream().anyMatch(task -> task.getId().equals(id));
+    if (!isShared) {
+      throw new NoSuchElementException("No task found with id: " + id);
+    }
+    var searched = taskService.findById(id);
+    model.addAttribute("task", searched.get());
+    return "task/editSharedTask";
   }
 }

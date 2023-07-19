@@ -90,23 +90,6 @@ public class TaskController {
     return mav;
   }
 
-  @RequestMapping(value = "/task/{id}", method = RequestMethod.PUT, consumes = "application/json")
-  public Boolean update(@RequestBody EditTaskSchema req, @PathVariable("id") Long id) {
-    var searched = taskService.findById(id);
-    if (searched.isEmpty()) {
-      return false;
-    }
-    Task task = searched.get();
-    task.setTitle(req.getTitle());
-    task.setDescription(req.getDescription());
-    task.setDueDate(req.getDue_date());
-    task.setPriority(req.getPriority());
-    task.setUpdated_at(LocalDateTime.now());
-
-    taskService.save(task);
-    return true;
-  }
-
   @DeleteMapping("/task/{id}")
   public String delete(@PathVariable("id") Long id) {
     taskService.delete(id);
@@ -180,8 +163,10 @@ public class TaskController {
       throw new TaskNotFoundException();
     }
     Task searchedTask = searched.get();
-    task.setId(id);
-    task.setCreated_at(searchedTask.getCreated_at());
+    searchedTask.setTitle(task.getTitle());
+    searchedTask.setDescription(task.getDescription());
+    searchedTask.setDueDate(task.getDueDate());
+    searchedTask.setPriority(task.getPriority());
     taskService.update(task);
     return "redirect:/task/" + id;
   }

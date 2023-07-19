@@ -18,6 +18,8 @@
     <p><b>Description:</b> <span th:text="${task.description}"></span></p>
     <p><b>Due Date:</b> <span th:text="${task.dueDate}"></span></p>
     <p><b>Priority:</b> <span th:text="${task.priority}"></span></p>
+    <a th:href="@{/shared/{id}/edit(id=*{task.id})}"
+      class="btn btn-secondary mt-3">Edit</a>
     <a href="/api/shared" class="btn btn-primary mt-3">戻る</a>
     <div class="container">
       <h2>共有一覧</h2>
