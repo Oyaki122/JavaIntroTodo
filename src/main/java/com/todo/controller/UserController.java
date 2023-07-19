@@ -2,11 +2,9 @@ package com.todo.controller;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,16 +12,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.todo.entity.DoneTask;
 import com.todo.entity.MUser;
 import com.todo.entity.Task;
-import com.todo.service.DoneTaskService;
 import com.todo.service.TaskService;
 import com.todo.service.UserService;
 import com.todo.auth.SimpleLoginUser;
@@ -37,8 +31,6 @@ public class UserController {
 
   @Autowired
   private TaskService taskService;
-  @Autowired
-  private DoneTaskService doneTaskService;
 
   @GetMapping("/signup")
   public String getSignup(@ModelAttribute("user") SignupForm form) {
@@ -91,7 +83,5 @@ public class UserController {
       return "redirect:/error";
     }
   }
-
-  
 
 }
