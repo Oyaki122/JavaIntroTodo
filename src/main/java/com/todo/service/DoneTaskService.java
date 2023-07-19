@@ -31,17 +31,17 @@ public class DoneTaskService {
     taskRepository.deleteById(id);
   }
 
-    public DoneTask update(DoneTask task) {
+  public DoneTask update(DoneTask task) {
     if (task.getId() == null) {
-        throw new IllegalArgumentException("ID cannot be null when updating a task.");
+      throw new IllegalArgumentException("ID cannot be null when updating a task.");
     }
     LocalDateTime currentDateTime = LocalDateTime.now();
-    
+
     task.setUpdated_at(currentDateTime);
     return taskRepository.save(task);
   }
 
-public List<DoneTask> findByCreateUserId(int id) {
-  return taskRepository.findByCreateUserId(id);
-}
+  public List<DoneTask> findByCreateUserId(int id) {
+    return taskRepository.findByCreateUserId(id);
+  }
 }

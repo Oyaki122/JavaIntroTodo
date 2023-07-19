@@ -73,41 +73,25 @@ public class UserController {
 
   @GetMapping("/task")
   public String user(Model model, Principal principal) {
-      // ログインユーザーのemailを取得
-      String email = principal.getName();
-      
-      // ログインユーザーの情報を取得
-      Optional<MUser> optUser = userService.findByEmail(email);
-      
-      if (optUser.isPresent()) {
-          MUser user = optUser.get();
-          
-          // ログインユーザーが作成したタスクのみを取得し、due_dateの昇順、priorityの降順で並べる
-          List<Task> tasks = taskService.findByCreateUserId(user.getId());
-          
-          model.addAttribute("tasks", tasks);
-          return "task/user-top";
-      } else {
-          return "redirect:/error";
-      }
-  }
-  @GetMapping("/donetask")
-  public String donetask(Model model, Principal principal) {
-      String email = principal.getName();
-      
-      Optional<MUser> optUser = userService.findByEmail(email);
-      
-      if (optUser.isPresent()) {
-          MUser user = optUser.get();
-         
-          List<DoneTask> tasks = doneTaskService.findAll();
-          // findByCreateUserId(user.getId());
-          model.addAttribute("tasks", tasks);
-          return "task/user-top-done";
-      } else {
-          return "redirect:/error";
-      }
+    // ログインユーザーのemailを取得
+    String email = principal.getName();
+
+    // ログインユーザーの情報を取得
+    Optional<MUser> optUser = userService.findByEmail(email);
+
+    if (optUser.isPresent()) {
+      MUser user = optUser.get();
+
+      // ログインユーザーが作成したタスクのみを取得し、due_dateの昇順、priorityの降順で並べる
+      List<Task> tasks = taskService.findByCreateUserId(user.getId());
+
+      model.addAttribute("tasks", tasks);
+      return "task/user-top";
+    } else {
+      return "redirect:/error";
+    }
   }
 
+  
 
 }
