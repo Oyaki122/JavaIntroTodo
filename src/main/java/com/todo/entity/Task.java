@@ -18,11 +18,12 @@ import java.util.List;
 @Table(name = "Tasks")
 public class Task extends TaskBase {
   @ManyToMany
-  // @JoinTable(name = "share", joinColumns = @JoinColumn(name="user_id"),
-  // referencedColumnName="id"
-  // inverseJoinColumns = @JoinColumn(name="task_id", referencedColumnName="id"))
+  @JoinTable(name = "share", 
+             joinColumns = @JoinColumn(name = "task_id", referencedColumnName = "id"),
+             inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"))
   private List<MUser> sharedUsers = new ArrayList<MUser>();
 
   @ManyToOne
-  private MUser createUser = new MUser();
+  @JoinColumn(name = "createUser_id") // assuming createUser_id is the field name in your database
+  private MUser createUser;
 }

@@ -57,8 +57,7 @@ public class DoneTaskcontroller {
 
     if (optUser.isPresent()) {
       MUser user = optUser.get();
-      List<DoneTask> tasks = doneTaskService.findAll();
-      // findByCreateUserId(user.getId());
+      List<DoneTask> tasks = doneTaskService.findByCreateUserId(user.getId());;
       model.addAttribute("doneTasks", tasks);
       return "/task/user-top-done";
     } else {
@@ -129,4 +128,5 @@ public class DoneTaskcontroller {
     doneTaskService.delete(id);
     return "redirect:/donetask";
   }
+  
 }
