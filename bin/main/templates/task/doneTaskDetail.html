@@ -27,7 +27,8 @@
             <b>Description:</b> <span th:text="${task.description}"></span>
           </p>
           <p><b>Due Date:</b> <span th:text="${task.dueDate}"></span></p>
-
+          <p><b>Created At:</b> <span th:text="${task.created_at}"></span></p>
+          <p><b>Updated At:</b> <span th:text="${task.updated_at}"></span></p>
           <a href="/api/donetask" class="btn btn-primary mt-3"
             ><i class="fas fa-arrow-left"></i> Back</a
           >
@@ -35,26 +36,7 @@
       </div>
       <div class="container mt-3">
         <h2><i class="fas fa-share-alt"></i> Shared list</h2>
-        <form
-          th:action="@{/doneTask/{id}/share(id=${task.id})}"
-          th:method="post"
-          class="mt-3"
-        >
-          <div class="input-group mb-3">
-            <span class="input-group-text" id="email-addon"
-              ><i class="fas fa-at"></i
-            ></span>
-            <input
-              type="email"
-              class="form-control"
-              name="user_email"
-              aria-label="Email"
-              aria-describedby="email-addon"
-            />
-            <button type="submit" class="btn btn-success">
-              <i class="fas fa-plus"></i> Add
-            </button>
-          </div>
+
         </form>
 
         <table class="table mt-3">
@@ -66,11 +48,7 @@
                   th:action="@{/doneTask/{doneTask}/share/{user}(doneTask=${task.id}, user=${sharedUser.id})}"
                   th:method="delete"
                   style="display: inline"
-                >
-                  <button type="submit" class="btn btn-danger">
-                    <i class="fas fa-trash"></i> Delete
-                  </button>
-                </form>
+                ></form>
               </td>
             </tr>
           </tbody>

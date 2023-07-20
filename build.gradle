@@ -31,7 +31,6 @@ repositories {
 dependencies {
     // Use JUnit Jupiter for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
-
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:31.1-jre'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -46,11 +45,6 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6:3.1.1.RELEASE'
 }
-
-// application {
-//     // Define the main class for the application.
-//     mainClass = 'todo.App'
-// }
 
 tasks.named('test') {
     // Use JUnit Platform for unit tests.

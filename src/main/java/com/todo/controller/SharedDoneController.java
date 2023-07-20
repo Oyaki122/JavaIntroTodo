@@ -68,26 +68,6 @@ public class SharedDoneController {
 
     return mav;
   }
-
-  // @RequestMapping(value = "/sharedDone/{id}", method = RequestMethod.PUT,
-  // consumes = "application/json")
-  // public Boolean update(@RequestBody EditTaskSchema req, @PathVariable("id")
-  // Long id) {
-  // var searched = taskService.findById(id);
-  // if (searched.isEmpty()) {
-  // return false;
-  // }
-  // Task task = searched.get();
-  // task.setTitle(req.getTitle());
-  // task.setDescription(req.getDescription());
-  // task.setDueDate(req.getDue_date());
-  // task.setPriority(req.getPriority());
-  // task.setUpdated_at(LocalDateTime.now());
-
-  // taskService.save(task);
-  // return true;
-  // }
-
   @PostMapping("/sharedDone/{id}/undone")
   public String done(@PathVariable("id") Long id) {
     var searched = doneTaskService.findById(id);

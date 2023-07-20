@@ -115,7 +115,7 @@ public class DoneTaskcontroller {
   @DeleteMapping("/donetask/{id}")
   public String delete(@PathVariable("id") Long id) {
     doneTaskService.delete(id);
-    return "redirect:/task";
+    return "redirect:/donetask";
   }
 
   @PostMapping("/donetask/{id}/undone")

@@ -161,10 +161,9 @@ public class TaskController {
       throw new TaskNotFoundException();
     }
     Task searchedTask = searched.get();
-    searchedTask.setTitle(task.getTitle());
-    searchedTask.setDescription(task.getDescription());
-    searchedTask.setDueDate(task.getDueDate());
-    searchedTask.setPriority(task.getPriority());
+    task.setCreated_at(searchedTask.getCreated_at());
+    task.setUpdated_at(searchedTask.getUpdated_at());
+    task.setCreateUser(searchedTask.getCreateUser());
     taskService.update(task);
     return "redirect:/task/" + id;
   }
