@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.beans.BeanUtils;
@@ -26,6 +27,7 @@ import com.todo.entity.MUser;
 import org.springframework.ui.Model;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.security.Principal;
 import java.time.LocalDateTime;
 
@@ -84,7 +86,15 @@ public class DoneTaskcontroller {
     doneTaskService.update(task);
     return "redirect:/donetask/" + id;
   }
+  @GetMapping("/donetask/{id}")
+  public ModelAndView task(@PathVariable("id") Long id) {
+    ModelAndView mav = new ModelAndView("task/doneTaskDetail");
+    DoneTask task = doneTaskService.findById(id).orElseThrow(() -> new NoSuchElementException("No task found with id: " + id));
+    mav.addObject("task", task);
+    mav.addObject("sharedUsers", task.getDoneSharedUsers());
 
+    return mav;
+  }
   @RequestMapping(value = "/donetask/{id}", method = RequestMethod.PUT, consumes = "application/json")
   public Boolean update(@RequestBody EditTaskSchema req, @PathVariable("id") Long id) {
     var searched = doneTaskService.findById(id);

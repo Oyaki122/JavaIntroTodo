@@ -44,7 +44,7 @@
               <a class="nav-link" th:href="@{/donetask}">Done</a>
             </li>
             <li class="nav-item" th:if="${#authentication.principal != null}">
-              <a class="nav-link" th:href="@{/sheareddonetask}">Done Shared</a>
+              <a class="nav-link" th:href="@{/sharedDone}">Done Shared</a>
             </li>
             <li class="nav-item" th:if="${#authentication.principal != null}">
               <a class="nav-link" th:href="@{/logout}">Logout</a>
@@ -72,7 +72,9 @@
             <td th:text="${doneTask.dueDate}"></td>
             <td th:text="${doneTask.priority}"></td>
             <td>
-              <a class="btn btn-primary" th:href="@{/donetask/{id}(id=${doneTask.id})}"
+              <a
+                class="btn btn-primary"
+                th:href="@{/donetask/{id}(id=${doneTask.id})}"
                 >Details</a
               >
               <form
