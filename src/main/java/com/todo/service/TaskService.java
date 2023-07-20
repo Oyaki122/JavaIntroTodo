@@ -47,6 +47,11 @@ public List<Task> findByCreateUserId(int id) {
   return taskRepository.findByCreateUserIdOrderByDueDateAscPriorityDesc(id);
 }
 
+public List<Task> findBySharedUserId(int id) {
+  return taskRepository.findTasksBySharedUserId(id);
+}
+
+
 
 
 }

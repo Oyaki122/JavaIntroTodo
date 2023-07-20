@@ -31,6 +31,7 @@ import com.todo.service.DoneTaskService;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.security.Principal;
 import java.time.LocalDateTime;
 
 import lombok.Data;
@@ -173,5 +174,22 @@ public class TaskController {
     model.addAttribute("task", new Task());
     return "task/createTask";
   }
+<<<<<<< HEAD
 
+=======
+    @GetMapping("/shared")
+  public String sharedtask(Model model, Principal principal) {
+    String email = principal.getName();
+    Optional<MUser> optUser = userService.findByEmail(email);
+    if (optUser.isPresent()) {
+      MUser user = optUser.get();
+      List<Task> tasks = taskService.findBySharedUserId(user.getId());
+      model.addAttribute("tasks", tasks);
+      return "task/shared-top";
+    } else {
+      return "redirect:/error";
+    }
+  }
+  
+>>>>>>> 87eb4687c48d2e1bced9f5f2dbf6254f734985e2
 }
