@@ -9,7 +9,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -42,6 +41,9 @@ public class MUser {
 
   @ManyToMany(mappedBy = "sharedUsers")
   private List<Task> sharedTasks = new ArrayList<Task>();
+
+  @ManyToMany(mappedBy = "doneSharedUsers")
+  private List<DoneTask> doneSharedTasks = new ArrayList<DoneTask>();
 
   @OneToMany(mappedBy = "createUser")
   private List<Task> myTasks = new ArrayList<Task>();

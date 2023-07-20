@@ -1,30 +1,31 @@
 package com.todo.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.todo.service.TaskService;
 import com.todo.service.UserService;
 import com.todo.entity.Task;
 import com.todo.entity.DoneTask;
+import com.todo.entity.MUser;
 import com.todo.service.DoneTaskService;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.time.LocalDateTime;
 
 import lombok.Data;
-
-import com.todo.schema.EditTaskSchema;
 
 @Controller
 public class SharedController {
@@ -72,21 +73,26 @@ public class SharedController {
     return mav;
   }
 
-  @RequestMapping(value = "/shared/{id}", method = RequestMethod.PUT, consumes = "application/json")
-  public Boolean update(@RequestBody EditTaskSchema req, @PathVariable("id") Long id) {
+  @PutMapping("/shared/{id}")
+  public String update(@PathVariable("id") Long id, @Validated @ModelAttribute Task task, BindingResult bindingResult,
+      @AuthenticationPrincipal UserDetails user) {
+    var loginUser = userService.findByEmail(user.getUsername())
+        .orElseThrow(() -> new NoSuchElementException("No user found with email: " + user.getUsername()));
+    var isShared = loginUser.getSharedTasks().stream().anyMatch(i -> i.getId().equals(id));
+    if (!isShared) {
+      throw new NoSuchElementException("No task found with id: " + id);
+    }
     var searched = taskService.findById(id);
     if (searched.isEmpty()) {
-      return false;
+      throw new TaskNotFoundException();
     }
-    Task task = searched.get();
-    task.setTitle(req.getTitle());
-    task.setDescription(req.getDescription());
-    task.setDueDate(req.getDue_date());
-    task.setPriority(req.getPriority());
-    task.setUpdated_at(LocalDateTime.now());
-
-    taskService.save(task);
-    return true;
+    Task searchedTask = searched.get();
+    searchedTask.setTitle(task.getTitle());
+    searchedTask.setDescription(task.getDescription());
+    searchedTask.setDueDate(task.getDueDate());
+    searchedTask.setPriority(task.getPriority());
+    taskService.update(searchedTask);
+    return "redirect:/shared/" + id;
   }
 
   @PostMapping("/shared/{id}/done")
@@ -103,9 +109,28 @@ public class SharedController {
     doneTask.setPriority(task.getPriority());
     doneTask.setCreated_at(task.getCreated_at());
     doneTask.setUpdated_at(task.getUpdated_at());
+    doneTask.setDoneSharedUsers(task.getSharedUsers().stream().map(i -> {
+      MUser user = new MUser();
+      BeanUtils.copyProperties(i, user);
+      return user;
+    }).toList());
+    doneTask.setCreateUser(task.getCreateUser());
 
-    doneTaskService.save(doneTask);
     taskService.delete(id);
+    doneTaskService.save(doneTask);
     return "redirect:/shared";
+  }
+
+  @GetMapping("/shared/{id}/edit")
+  public String edit(Model model, @PathVariable("id") Long id, @AuthenticationPrincipal UserDetails user) {
+    var loginUser = userService.findByEmail(user.getUsername())
+        .orElseThrow(() -> new NoSuchElementException("No user found with email: " + user.getUsername()));
+    var isShared = loginUser.getSharedTasks().stream().anyMatch(task -> task.getId().equals(id));
+    if (!isShared) {
+      throw new NoSuchElementException("No task found with id: " + id);
+    }
+    var searched = taskService.findById(id);
+    model.addAttribute("task", searched.get());
+    return "task/editSharedTask";
   }
 }

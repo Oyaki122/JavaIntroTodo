@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,8 +34,6 @@ import java.util.Optional;
 import java.time.LocalDateTime;
 
 import lombok.Data;
-
-import com.todo.schema.EditTaskSchema;
 
 @Controller
 public class TaskController {
@@ -89,23 +87,6 @@ public class TaskController {
     return mav;
   }
 
-  @RequestMapping(value = "/task/{id}", method = RequestMethod.PUT, consumes = "application/json")
-  public Boolean update(@RequestBody EditTaskSchema req, @PathVariable("id") Long id) {
-    var searched = taskService.findById(id);
-    if (searched.isEmpty()) {
-      return false;
-    }
-    Task task = searched.get();
-    task.setTitle(req.getTitle());
-    task.setDescription(req.getDescription());
-    task.setDueDate(req.getDue_date());
-    task.setPriority(req.getPriority());
-    task.setUpdated_at(LocalDateTime.now());
-
-    taskService.save(task);
-    return true;
-  }
-
   @DeleteMapping("/task/{id}")
   public String delete(@PathVariable("id") Long id) {
     taskService.delete(id);
@@ -127,8 +108,14 @@ public class TaskController {
     doneTask.setCreated_at(task.getCreated_at());
     doneTask.setUpdated_at(task.getUpdated_at());
     doneTask.setCreateUser(task.getCreateUser());
-    doneTaskService.save(doneTask);
+    doneTask.setDoneSharedUsers(task.getSharedUsers().stream().map(i -> {
+      MUser user = new MUser();
+      BeanUtils.copyProperties(i, user);
+      return user;
+    }).toList());
+
     taskService.delete(id);
+    doneTaskService.save(doneTask);
     return "redirect:/task";
   }
 
@@ -173,8 +160,10 @@ public class TaskController {
       throw new TaskNotFoundException();
     }
     Task searchedTask = searched.get();
-    task.setId(id);
-    task.setCreated_at(searchedTask.getCreated_at());
+    searchedTask.setTitle(task.getTitle());
+    searchedTask.setDescription(task.getDescription());
+    searchedTask.setDueDate(task.getDueDate());
+    searchedTask.setPriority(task.getPriority());
     taskService.update(task);
     return "redirect:/task/" + id;
   }
