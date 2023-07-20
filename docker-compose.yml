@@ -1,0 +1,10 @@
+version: '3.6'
+services:
+  java:
+    container_name: java
+    build: ./
+    tty: true
+    volumes:
+      - ./:/java_project/
+    ports:
+      - "127.0.0.1:8090:8090"
